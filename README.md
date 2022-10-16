@@ -8,9 +8,8 @@ Dual licensed:
 
 Currently supported:
 
-MacOS (written in PureBasic)
+MacOS (written in Swift, Xcode)
 - fullscreen-display
-- Menu by pressing ESC
 - all HTML-websites should work
 
 iOS (written in Swift, Xcode)

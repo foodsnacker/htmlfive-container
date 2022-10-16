@@ -1,0 +1,180 @@
+<!DOCTYPE html>
+<html lang="de" xml:lang="de" xmlns="http://www.w3.org/1999/xhtml">
+<head>
+<meta charset="utf-8"/>
+<title>htmlfive.net - engine for interactive websites</title>
+<style>
+	* { margin: 0; padding: 0; background-color: transparent; }
+	html { overflow: hidden; scroll-behavior: smooth; }
+body { background-color:#888888}
+	/* Content should be displayed centered */
+	.aligncentered { display: -webkit-flex; display: -webkit-box; display: -ms-flexbox; display: flex; -webkit-align-items: center; -webkit-box-align: center; -ms-flex-align: center; align-items: center; }
+
+	div#game, div#content { aspect-ratio: 16 / 9; position: absolute; top:0; bottom:0; left:0; right:0; overflow: hidden; padding:0; margin:0; background-color:transparent }
+  
+	/* Standards */
+	.standardpadding { padding-top: 20px; }
+</style>
+
+<body>
+
+	<div id="content"><div id="game"></div></div>
+	
+	<script>var HTMLfive = {};</script>
+	<script src="settings.js"></script>	
+	<script src="src/audio.js"></script>
+	<script src="src/html.js"></script>
+	<script src="src/anim.js"></script>
+	<script src="src/message.js"></script>
+	<script src="src/image.js"></script>
+	<script src="src/storage.js"></script>
+	<script>
+
+	/* htmlfive.net 0.0.3 - EXAMPLES
+		(c), (p) 2020-2022 Jörg Burbach, Ducks on the Water 
+		Interactive-Engine for htmlfive.net with caching for strict HTML5-support. Works in all modern browsers.
+		
+		Dual-Licence: private or academic (GPL), commercial (proprietary, to be decided)
+		
+		todo:
+		- examples for IMAGE.js
+	*/
+
+
+	function reportWindowSize() { console.log("h");} 
+	window.addEventListener('resize', reportWindowSize);
+	
+	function test() { HTMLfive.Audio.play('electronic-cash'); }
+
+	// Create and Cache stuff
+	HTMLfive.Audio.add('electronic-cash',HTMLfive.Audio.AudioTypes.music,{'fadein':true,'fadeout':true}); // add this to play after finished loading ,'loadedcallback':test});
+	HTMLfive.Audio.add('click',HTMLfive.Audio.AudioTypes.ui);
+
+	// Add some Text and buttons
+	HTMLfive.HTML.add('html5info','<h1>htmlfive.net</h1><br>Welcome to HTMLfive, the fresh HTML5-Engine for Games and interactive Apps.',{'left':'10px','top':'10px','fadein':true});
+	HTMLfive.HTML.add('html5_audio','<h2>Simple Audio Examples</h2>',{'left':'10px','top':'100px','fadein':true});
+
+	// Add several Buttons with Callback: Music
+	HTMLfive.HTML.add('html5_audio_playmusic','Play Music',{'left':'10px','top':'130px','fadein':true,'callback':PlayMusic});
+	HTMLfive.HTML.add('html5_audio_pausemusic','Pause Music',{'left':'100px','top':'130px','fadein':true,'callback':PlayPauseMusic});
+	HTMLfive.HTML.add('html5_audio_stopmusic','Stop Music',{'left':'200px','top':'130px','fadein':true,'callback':StopMusic});
+	HTMLfive.HTML.add('html5_audio_fademusic','Fade out Music',{'left':'280px','top':'130px','fadein':true,'callback':FadeMusic});
+	HTMLfive.HTML.add('html5_audio_playsfx','Play SFX with Callback',{'left':'400px','top':'130px','fadein':true,'callback':PlaySFX});
+
+	// HTML5-Animation
+	HTMLfive.HTML.add('html5_animation','<h2>Simple Animation Examples</h2>',{'left':'10px','top':'200px','fadein':true});
+	HTMLfive.HTML.add('html5_animation_moveto','moveTo',{'left':'10px','top':'230px','fadein':true,'callback':PlayMoveTo});
+	HTMLfive.HTML.add('html5_animation_moveby','moveBy',{'left':'100px','top':'230px','fadein':true,'callback':PlayMoveBy});
+
+	// HTML5-UI-Example, uses "image/ui/requesterwindow.png"
+	HTMLfive.HTML.add('html5_ui','<h2>Simple UI Examples</h2>',{'left':'10px','top':'300px','fadein':true});
+	HTMLfive.HTML.add('html5_ui_showinfo','Show Info',{'left':'10px','top':'330px','fadein':true,'callback':ShowInfo});
+
+	// Examples for local and remote storage
+	HTMLfive.HTML.add('html5_storage','<h2>Simple Storage Examples</h2>',{'left':'10px','top':'400px','fadein':true});
+	HTMLfive.HTML.add('html5_storage_save','Save Data',{'left':'10px','top':'430px','fadein':true,'callback':SaveData});
+	HTMLfive.HTML.add('html5_storage_load','Load Data',{'left':'100px','top':'430px','fadein':true,'callback':LoadData});
+	HTMLfive.HTML.add('html5_storage_savephp','Save to PHP',{'left':'200px','top':'430px','fadein':true,'callback':CreateSavePHP});
+
+	// Show stuff -> move to "add"-functions
+	HTMLfive.HTML.show('html5info');
+	HTMLfive.HTML.show('html5_audio');
+	HTMLfive.HTML.show('html5_audio_playmusic');
+	HTMLfive.HTML.show('html5_audio_pausemusic');
+	HTMLfive.HTML.show('html5_audio_fademusic');
+	HTMLfive.HTML.show('html5_audio_stopmusic');
+	HTMLfive.HTML.show('html5_audio_playsfx');
+
+	HTMLfive.HTML.show('html5_animation');
+	HTMLfive.HTML.show('html5_animation_moveto');
+	HTMLfive.HTML.show('html5_animation_moveby');
+
+	HTMLfive.HTML.show('html5_ui');
+	HTMLfive.HTML.show('html5_ui_showinfo');
+
+	HTMLfive.HTML.show('html5_storage');
+	HTMLfive.HTML.show('html5_storage_save');
+	HTMLfive.HTML.show('html5_storage_load');
+	HTMLfive.HTML.show('html5_storage_savephp');
+	
+	// playing finished? give alert and remove the track from cache
+	function AudioCallback() {
+		alert('Hello, World. You`ve played a click...');
+	}
+	
+	// play music
+	function PlayMusic() {
+		// leave, if audio is already playing
+		if (HTMLfive.Audio.isPlaying('electronic-cash')) { return; }
+		
+		// play file from cache
+		HTMLfive.Audio.play('electronic-cash');
+	}
+	
+	// fade out music
+	function FadeMusic() {
+		// leave, if audio is not playing
+		if (!HTMLfive.Audio.isPlaying('electronic-cash')) { return; }
+		
+		// fadeout audio
+		HTMLfive.Audio.fadeOut('electronic-cash');
+	}
+	
+	// pause or resume playing
+	function PlayPauseMusic(buttonelement) {
+		if ( HTMLfive.Audio.isPaused('electronic-cash')) {
+			HTMLfive.Audio.resume('electronic-cash');
+			HTMLfive.HTML.edit('html5_audio_pausemusic','Pause Music');
+		} else {
+			HTMLfive.Audio.pause('electronic-cash');
+			HTMLfive.HTML.edit('html5_audio_pausemusic','Resume Music');
+		}
+	}
+	
+	// Stop music from playing
+	function StopMusic() {
+		HTMLfive.Audio.stop('electronic-cash');
+	}
+	
+	// play sound effect with callback
+	function PlaySFX() {
+		// add Callback-function and play effect
+		HTMLfive.Audio.addCallback('click', AudioCallback);
+		HTMLfive.Audio.play('click');
+	}
+	
+	/* Animations */
+	function PlayMoveTo() {
+		HTMLfive.Anim.moveTo('html5_animation_moveto',{"tox":400,"toy":200,"duration":1});
+	}
+	
+	function PlayMoveBy() {
+		HTMLfive.Anim.moveBy('html5_animation_moveby',{"tox":200,"toy":-50,"duration":2});
+	}
+	
+	/* Messages */
+	function ShowInfo() {
+		HTMLfive.Message.show('ui_information',{'title':'Information','text':'<p>Welcome to <a href="https://www.htmlfive.net" target="_blank">HTLMfive.net</a>, an easy to use modular Javascript-framework for games and apps in the browser.</p><p>It is dual licensed, free for open-source, private and educational purposes. For comercial use, I will set up a Patreon soon.</p>','ok':'ShowOK','cancel':'ShowCancel','width':'400','height':"200",'center':'true','framepng':'message.png'});
+	}
+
+	function ShowOK() { HTMLfive.Message.hide('ui_information'); }
+	function ShowCancel() { HTMLfive.Message.hide('ui_information'); }
+	
+	/* Storage */
+	function SaveData() { HTMLfive.Audio.play('click'); HTMLfive.storage.save('storage_test','Hello, World!'); HTMLfive.Image.remove('23_Chiefinspector_Vorhang_mit.jpg');}
+	function LoadData() { HTMLfive.Audio.play('click'); document.getElementById('html5_storage_load').innerHTML = HTMLfive.storage.load('storage_test','Good bye, World!'); }
+	function CreateSavePHP() { 
+		// set to your url, and upload teststorage.php
+		HTMLfive.storage.setURL('https://www.example.com/teststorage.php',storageCallback);
+
+		HTMLfive.storage.save('test','Hello, World!');
+		console.log(HTMLfive.storage.load('test','See you soon!'));
+	}
+
+	// used, if you set URL and Callback, the call with HTMLfive.storage.storageType.external
+	function storageCallback(backdata) { console.log(backdata); }
+
+
+</script>
+</body>
+</html>
