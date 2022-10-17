@@ -30,7 +30,7 @@ class ViewController: NSViewController, WKUIDelegate {
         webView = WKWebView (frame: .zero, configuration:webConfiguration);
         webView.uiDelegate = self ;
         view = webView;
-        }
+    }
 
     // view did load
     override func viewDidLoad() {
